@@ -1,0 +1,19 @@
+{
+  "name": "sms-sender",
+  "version": "1.0.0",
+  "description": "Sistema de envio de sms masivos",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aleordoh/SMS-Sender.git"
+  },
+  "author": "Martin Orodoñéz",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Aleordoh/SMS-Sender/issues"
+  },
+  "homepage": "https://github.com/Aleordoh/SMS-Sender#readme"
+}

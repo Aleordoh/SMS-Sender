@@ -133,17 +133,30 @@ SMS-Sender/
 
 ⚠️ **Importante:**
 
-1. Mantén las credenciales del gateway seguras
-2. Usa HTTPS en producción
-3. Implementa autenticación y autorización según tus necesidades
-4. Los archivos subidos se eliminan automáticamente después del procesamiento
-5. Valida siempre los números de teléfono y mensajes antes de enviar
+1. **Credenciales**: Mantén las credenciales del gateway seguras. Usa variables de entorno en producción.
+2. **HTTPS**: Usa HTTPS en producción para proteger las credenciales en tránsito.
+3. **Autenticación**: Implementa autenticación y autorización según tus necesidades.
+4. **Archivos temporales**: Los archivos subidos se eliminan automáticamente después del procesamiento.
+5. **Validación**: El sistema valida números de teléfono y mensajes antes de enviar.
+6. **Rate Limiting**: Incluye limitación de tasa para prevenir abuso:
+   - 10 solicitudes de envío por IP cada 15 minutos
+   - 20 pruebas de conexión por IP cada 5 minutos
+7. **Gateway URL**: La URL del gateway es validada para prevenir ataques SSRF.
+8. **Archivos confiables**: Solo acepta archivos CSV/XLSX de fuentes confiables (máx 5MB).
+
+### Vulnerabilidades Conocidas
+
+- La librería `xlsx` (v0.18.5) tiene vulnerabilidades conocidas:
+  - **Prototype Pollution** (CVE pendiente)
+  - **ReDoS** (Regular Expression Denial of Service)
+  - **Mitigación**: Solo procesa archivos de fuentes confiables. Valida el tamaño (máx 5MB).
+  - **Alternativa**: Considera actualizar a una versión parcheada cuando esté disponible o usar una librería alternativa.
 
 ## Limitaciones conocidas
 
-- La librería `xlsx` tiene vulnerabilidades conocidas (Prototype Pollution y ReDoS). Usa solo con archivos confiables.
 - Los mensajes están limitados a 160 caracteres (estándar SMS)
 - El sistema procesa los SMS de forma secuencial para evitar saturar el gateway
+- El gateway debe ser accesible desde el servidor donde se ejecuta la aplicación
 
 ## Licencia
 

@@ -2,7 +2,21 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
+const rateLimit = require('express-rate-limit');
 const SMSController = require('../controllers/smsController');
+
+// Rate limiting middleware
+const uploadLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10, // Limit each IP to 10 requests per windowMs
+    message: 'Demasiadas solicitudes desde esta IP, por favor intente más tarde.'
+});
+
+const testLimiter = rateLimit({
+    windowMs: 5 * 60 * 1000, // 5 minutes
+    max: 20, // Limit each IP to 20 test requests per windowMs
+    message: 'Demasiadas pruebas de conexión, por favor intente más tarde.'
+});
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -36,8 +50,8 @@ const upload = multer({
 
 // Routes
 router.get('/', SMSController.showUploadForm);
-router.post('/upload', upload.single('file'), SMSController.processUpload);
+router.post('/upload', uploadLimiter, upload.single('file'), SMSController.processUpload);
 router.get('/config', SMSController.showConfig);
-router.post('/test-connection', SMSController.testConnection);
+router.post('/test-connection', testLimiter, SMSController.testConnection);
 
 module.exports = router;

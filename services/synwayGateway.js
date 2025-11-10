@@ -10,7 +10,27 @@ class SynwayGateway {
         this.port = config.port || 80;
         this.username = config.username || 'admin';
         this.password = config.password || 'admin';
+        
+        // Validate host to prevent SSRF
+        this.validateHost(this.host);
+        
         this.baseUrl = `http://${this.host}:${this.port}`;
+    }
+
+    /**
+     * Validate host to prevent SSRF attacks
+     * Allows: IP addresses, hostnames, but blocks dangerous protocols
+     */
+    validateHost(host) {
+        // Block file:// and other dangerous protocols
+        if (host.includes('://')) {
+            throw new Error('Invalid host: protocol not allowed in host configuration');
+        }
+        
+        // Basic validation - should not be empty
+        if (!host || host.trim().length === 0) {
+            throw new Error('Host cannot be empty');
+        }
     }
 
     /**

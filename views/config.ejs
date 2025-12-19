@@ -55,13 +55,15 @@
     <div class="api-docs">
       <h3>📖 Documentación del API Synway</h3>
       <p>El gateway Synway SMG4008-8WA utiliza una API HTTP para enviar SMS.</p>
-      <p><strong>Endpoint:</strong> <code>http://[host]:[port]/sendSMS</code></p>
-      <p><strong>Parámetros:</strong></p>
+      <p><strong>Endpoint:</strong> <code>http://[host]:80/API/TaskHandle</code></p>
+      <p><strong>Parámetros del JSON:</strong></p>
       <ul style="margin-left: 20px; margin-top: 10px;">
-        <li><code>username</code>: Usuario del gateway</li>
-        <li><code>password</code>: Contraseña del gateway</li>
-        <li><code>to</code>: Número de teléfono destino</li>
-        <li><code>text</code>: Mensaje a enviar</li>
+        <li><code>event</code>: "txsms" para envío de SMS</li>
+        <li><code>userid</code>: ID de usuario para tracking</li>
+        <li><code>num</code>: Número de teléfono destino</li>
+        <li><code>port</code>: Puerto a usar (-1 para auto)</li>
+        <li><code>encoding</code>: 0 para ASCII, 8 para Unicode</li>
+        <li><code>smsinfo</code>: Contenido del mensaje</li>
       </ul>
       <p style="margin-top: 10px;"><strong>Manual:</strong> <a href="https://www.synway.net/Download/Manual/UserManual/SMG_Wireless_Gateway_ManualV2.2.0.pdf" target="_blank" style="color: #667eea;">Ver manual completo</a></p>
       <p style="margin-top: 10px; color:#c62828"><strong>Importante:</strong> En el gateway, en <em>System Param → API Parameters</em>, activa <strong>API Enabled = Yes</strong>. Sin eso, el envío puede fallar aun cuando la conexión sea exitosa.</p>

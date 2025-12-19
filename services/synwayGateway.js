@@ -12,17 +12,9 @@ class SynwayGateway {
 			process.env.GATEWAY_PROTOCOL ||
 			'http'
 		).toLowerCase()
-		// If port is explicitly provided, use it; otherwise choose default by protocol
-		this.port = config.port || (this.protocol === 'https' ? 443 : 80)
+		this.port = config.port || process.env.GATEWAY_PORT || 80
 		this.username = config.username || 'admin'
 		this.password = config.password || 'admin'
-
-		// Endpoint configurable (default '/API/TaskHandle')
-		const endpoint =
-			config.smsEndpoint ||
-			process.env.GATEWAY_SMS_ENDPOINT ||
-			'/API/TaskHandle'
-		this.smsEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`
 
 		// Validate host to prevent SSRF
 		this.validateHost(this.host)
@@ -56,7 +48,7 @@ class SynwayGateway {
 	 */
 	async sendSMS(phoneNumber, message, options = {}) {
 		try {
-			const url = `${this.baseUrl}${this.smsEndpoint}`
+			const url = `${this.baseUrl}/API/TaskHandle`
 
 			// Prepare data according to API v1.8.0 spec
 			// event: "txsms" - Send SMS

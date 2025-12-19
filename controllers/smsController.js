@@ -60,8 +60,9 @@ class SMSController {
 
 			const gateway = new SynwayGateway(gatewayConfig)
 
-			// Send SMS messages
-			const results = await gateway.sendBulkSMS(recipients)
+			// Send SMS messages with configurable delay
+			const smsDelay = parseInt(process.env.SMS_DELAY || 6000)
+			const results = await gateway.sendBulkSMS(recipients, smsDelay)
 
 			// Clean up uploaded file
 			fs.unlinkSync(req.file.path)
@@ -73,6 +74,7 @@ class SMSController {
 				totalSent: results.filter((r) => r.success).length,
 				totalFailed: results.filter((r) => !r.success).length,
 				total: results.length,
+				sentTimestamp: Date.now(),
 			})
 		} catch (error) {
 			console.error('Error processing upload:', error)
@@ -102,6 +104,7 @@ class SMSController {
 				protocol: (process.env.GATEWAY_PROTOCOL || 'http').toLowerCase(),
 				username: process.env.GATEWAY_USERNAME || 'ApiUserAdmin',
 				password: process.env.GATEWAY_PASSWORD || 'acuerdo1234',
+				sms_delay: process.env.SMS_DELAY || 6000,
 			},
 		})
 	}
@@ -148,6 +151,87 @@ class SMSController {
 				success: false,
 				message: `Error: ${error.message}`,
 			})
+		}
+	}
+
+	/**
+	 * Query received SMS messages
+	 */
+	static async queryReceivedSMS(req, res) {
+		try {
+			const { begintime, endtime, port } = req.body
+
+			const gatewayConfig = {
+				host: process.env.GATEWAY_HOST || '192.168.1.45',
+				port: process.env.GATEWAY_PORT || 80,
+				protocol: (process.env.GATEWAY_PROTOCOL || 'http').toLowerCase(),
+				username: process.env.GATEWAY_USERNAME || 'ApiUserAdmin',
+				password: process.env.GATEWAY_PASSWORD || 'acuerdo1234',
+			}
+
+			const gateway = new SynwayGateway(gatewayConfig)
+			const result = await gateway.queryReceivedSMS(begintime, endtime, port)
+
+			res.json({
+				success: result.success,
+				messages: result.messages,
+				data: result.data,
+			})
+		} catch (error) {
+			res.json({
+				success: false,
+				error: error.message,
+				messages: [],
+			})
+		}
+	}
+
+	/**
+	 * Download received SMS as CSV
+	 */
+	static async downloadReceivedSMS(req, res) {
+		try {
+			const { begintime, endtime, port } = req.query
+
+			const gatewayConfig = {
+				host: process.env.GATEWAY_HOST || '192.168.1.45',
+				port: process.env.GATEWAY_PORT || 80,
+				protocol: (process.env.GATEWAY_PROTOCOL || 'http').toLowerCase(),
+				username: process.env.GATEWAY_USERNAME || 'ApiUserAdmin',
+				password: process.env.GATEWAY_PASSWORD || 'acuerdo1234',
+			}
+
+			const gateway = new SynwayGateway(gatewayConfig)
+			const result = await gateway.queryReceivedSMS(begintime, endtime, port)
+
+			if (!result.success || result.messages.length === 0) {
+				return res.status(404).send('No messages found')
+			}
+
+			// Generate CSV
+			const csvRows = []
+			csvRows.push('Phone,Message,Time,Port') // Header
+
+			result.messages.forEach((msg) => {
+				const row = [
+					`"${msg.phone}"`,
+					`"${(msg.message || '').replace(/"/g, '""')}"`,
+					`"${msg.time}"`,
+					`"${msg.port}"`,
+				]
+				csvRows.push(row.join(','))
+			})
+
+			const csv = csvRows.join('\n')
+
+			res.setHeader('Content-Type', 'text/csv')
+			res.setHeader(
+				'Content-Disposition',
+				`attachment; filename="received_sms_${Date.now()}.csv"`
+			)
+			res.send(csv)
+		} catch (error) {
+			res.status(500).send(`Error: ${error.message}`)
 		}
 	}
 }

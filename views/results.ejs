@@ -1,255 +1,217 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            padding: 40px;
-        }
-
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-            font-size: 28px;
-        }
-
-        .nav {
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-
-        .nav a {
-            display: inline-block;
-            padding: 10px 20px;
-            margin-right: 10px;
-            background: #667eea;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            transition: background 0.3s;
-        }
-
-        .nav a:hover {
-            background: #764ba2;
-        }
-
-        .summary {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .summary-card {
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .summary-card.total {
-            background: #e3f2fd;
-            border: 2px solid #2196f3;
-        }
-
-        .summary-card.success {
-            background: #e8f5e9;
-            border: 2px solid #4caf50;
-        }
-
-        .summary-card.failed {
-            background: #ffebee;
-            border: 2px solid #f44336;
-        }
-
-        .summary-card h3 {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-        }
-
-        .summary-card .number {
-            font-size: 36px;
-            font-weight: bold;
-        }
-
-        .summary-card.total .number {
-            color: #2196f3;
-        }
-
-        .summary-card.success .number {
-            color: #4caf50;
-        }
-
-        .summary-card.failed .number {
-            color: #f44336;
-        }
-
-        .results-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        .results-table th {
-            background: #667eea;
-            color: white;
-            padding: 12px;
-            text-align: left;
-            font-weight: 500;
-        }
-
-        .results-table td {
-            padding: 12px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .results-table tr:hover {
-            background: #f8f9fa;
-        }
-
-        .status {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .status.success {
-            background: #4caf50;
-            color: white;
-        }
-
-        .status.failed {
-            background: #f44336;
-            color: white;
-        }
-
-        .message-preview {
-            max-width: 300px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .button-group {
-            margin-top: 30px;
-            text-align: center;
-        }
-
-        .button {
-            display: inline-block;
-            padding: 12px 30px;
-            background: #667eea;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            transition: background 0.3s;
-            margin: 0 5px;
-        }
-
-        .button:hover {
-            background: #764ba2;
-        }
-
-        footer {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 2px solid #f0f0f0;
-            text-align: center;
-            color: #999;
-            font-size: 14px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/results.css">
 </head>
+
 <body>
-    <div class="container">
-        <h1><%= title %></h1>
-        
-        <div class="nav">
-            <a href="/sms">📤 Enviar SMS</a>
-            <a href="/sms/config">⚙️ Configuración</a>
-        </div>
+  <div class="container wide">
+    <h1><%= title %></h1>
 
-        <div class="summary">
-            <div class="summary-card total">
-                <h3>Total</h3>
-                <div class="number"><%= total %></div>
-            </div>
-            <div class="summary-card success">
-                <h3>Exitosos</h3>
-                <div class="number"><%= totalSent %></div>
-            </div>
-            <div class="summary-card failed">
-                <h3>Fallidos</h3>
-                <div class="number"><%= totalFailed %></div>
-            </div>
-        </div>
-
-        <table class="results-table">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Teléfono</th>
-                    <th>Mensaje</th>
-                    <th>Estado</th>
-                    <th>Detalles</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% results.forEach((result, index) => { %>
-                    <tr>
-                        <td><%= index + 1 %></td>
-                        <td><%= result.phone %></td>
-                        <td class="message-preview" title="<%= result.message %>">
-                            <%= result.message %>
-                        </td>
-                        <td>
-                            <span class="status <%= result.success ? 'success' : 'failed' %>">
-                                <%= result.success ? '✓ Enviado' : '✗ Fallido' %>
-                            </span>
-                        </td>
-                        <td>
-                            <% if (result.error) { %>
-                                <small style="color: #f44336;"><%= result.error %></small>
-                            <% } else { %>
-                                <small style="color: #4caf50;">OK</small>
-                            <% } %>
-                        </td>
-                    </tr>
-                <% }); %>
-            </tbody>
-        </table>
-
-        <div class="button-group">
-            <a href="/sms" class="button">📤 Enviar Más SMS</a>
-        </div>
-
-        <footer>
-            <p>SMS Sender - Synway SMG4008-8WA Gateway</p>
-        </footer>
+    <div class="nav">
+      <a href="/sms">📤 Enviar SMS</a>
+      <a href="/sms/config">⚙️ Configuración</a>
     </div>
+
+    <div class="summary">
+      <div class="summary-card total">
+        <h3>Total</h3>
+        <div class="number"><%= total %></div>
+      </div>
+      <div class="summary-card success">
+        <h3>Exitosos</h3>
+        <div class="number"><%= totalSent %></div>
+      </div>
+      <div class="summary-card failed">
+        <h3>Fallidos</h3>
+        <div class="number"><%= totalFailed %></div>
+      </div>
+    </div>
+
+    <table class="results-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Teléfono</th>
+          <th>Mensaje</th>
+          <th>Estado</th>
+          <th>Detalles</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% results.forEach((result, index) => { %>
+        <tr>
+          <td><%= index + 1 %></td>
+          <td><%= result.phone %></td>
+          <td class="message-preview" title="<%= result.message %>">
+            <%= result.message %>
+          </td>
+          <td>
+            <span class="status <%= result.success ? 'success' : 'failed' %>">
+              <%= result.success ? '✓ Enviado' : '✗ Fallido' %>
+            </span>
+          </td>
+          <td>
+            <% if (result.error) { %>
+            <small style="color: #f44336;"><%= result.error %></small>
+            <% } else { %>
+            <small style="color: #4caf50;">OK</small>
+            <% } %>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+
+    <div class="button-group">
+      <a href="/sms" class="button">📤 Enviar Más SMS</a>
+    </div>
+
+    <!-- Responses Section -->
+    <div class="responses-section">
+      <h2>📨 Consultar Respuestas SMS</h2>
+      <div class="info-box">
+        <p>Consulta los SMS recibidos en el gateway para ver si hay respuestas a los mensajes enviados.</p>
+      </div>
+
+      <div class="test-form" style="background: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
+        <form id="queryResponsesForm">
+          <div class="form-group">
+            <label for="begintime">Desde (últimas horas):</label>
+            <select id="timeRange" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 5px;">
+              <option value="1">Última hora</option>
+              <option value="3">Últimas 3 horas</option>
+              <option value="6" selected>Últimas 6 horas</option>
+              <option value="12">Últimas 12 horas</option>
+              <option value="24">Últimas 24 horas</option>
+            </select>
+          </div>
+          <button type="submit">🔍 Consultar Respuestas</button>
+        </form>
+      </div>
+
+      <div id="responsesResult" style="display: none;">
+        <div id="responsesContent"></div>
+        <div id="downloadButton" style="display: none; margin-top: 15px;">
+          <button onclick="downloadResponses()" class="button" style="width: 100%;">📥 Descargar Respuestas (CSV)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>SMS Sender - Synway SMG4008-8WA Gateway</p>
+    </footer>
+  </div>
+
+  <script>
+    let lastQueryParams = null;
+
+    function formatDateTime(dateStr) {
+      if (!dateStr) return '';
+      // Format: YYYYMMDDHHmmss -> readable format
+      const year = dateStr.substr(0, 4);
+      const month = dateStr.substr(4, 2);
+      const day = dateStr.substr(6, 2);
+      const hour = dateStr.substr(8, 2);
+      const min = dateStr.substr(10, 2);
+      const sec = dateStr.substr(12, 2);
+      return `${day}/${month}/${year} ${hour}:${min}:${sec}`;
+    }
+
+    function getTimeRange(hours) {
+      const now = new Date();
+      const past = new Date(now.getTime() - hours * 60 * 60 * 1000);
+
+      function formatTime(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hour = String(date.getHours()).padStart(2, '0');
+        const min = String(date.getMinutes()).padStart(2, '0');
+        const sec = String(date.getSeconds()).padStart(2, '0');
+        return `${year}${month}${day}${hour}${min}${sec}`;
+      }
+
+      return {
+        begintime: formatTime(past),
+        endtime: formatTime(now)
+      };
+    }
+
+    document.getElementById('queryResponsesForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const hours = parseInt(document.getElementById('timeRange').value);
+      const timeRange = getTimeRange(hours);
+      lastQueryParams = {
+        ...timeRange,
+        port: '-1'
+      };
+
+      const resultDiv = document.getElementById('responsesResult');
+      const contentDiv = document.getElementById('responsesContent');
+      const downloadBtn = document.getElementById('downloadButton');
+
+      resultDiv.style.display = 'block';
+      contentDiv.innerHTML = '<p style="text-align: center; padding: 20px;">Consultando respuestas...</p>';
+      downloadBtn.style.display = 'none';
+
+      try {
+        const response = await fetch('/sms/query-received', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(lastQueryParams)
+        });
+
+        const result = await response.json();
+
+        if (result.success && result.messages && result.messages.length > 0) {
+          let html = '<table class="responses-table">';
+          html += '<thead><tr><th>#</th><th>Teléfono</th><th>Mensaje</th><th>Fecha/Hora</th><th>Puerto</th></tr></thead>';
+          html += '<tbody>';
+
+          result.messages.forEach((msg, index) => {
+            html += `<tr>
+                            <td>${index + 1}</td>
+                            <td>${msg.phone || 'N/A'}</td>
+                            <td>${msg.message || 'N/A'}</td>
+                            <td>${formatDateTime(msg.time)}</td>
+                            <td>${msg.port || 'N/A'}</td>
+                        </tr>`;
+          });
+
+          html += '</tbody></table>';
+          html +=
+            `<p style="text-align: center; color: #28a745; margin-top: 10px;">✓ Se encontraron ${result.messages.length} mensajes recibidos</p>`;
+          contentDiv.innerHTML = html;
+          downloadBtn.style.display = 'block';
+        } else {
+          contentDiv.innerHTML =
+            '<div class="no-responses"><p>📭 No se encontraron respuestas en el período seleccionado</p></div>';
+          downloadBtn.style.display = 'none';
+        }
+      } catch (error) {
+        contentDiv.innerHTML =
+          `<div class="alert alert-error">✗ Error al consultar respuestas: ${error.message}</div>`;
+        downloadBtn.style.display = 'none';
+      }
+    });
+
+    function downloadResponses() {
+      if (!lastQueryParams) return;
+
+      const params = new URLSearchParams(lastQueryParams);
+      window.location.href = `/sms/download-received?${params.toString()}`;
+    }
+  </script>
 </body>
+
 </html>

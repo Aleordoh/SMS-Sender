@@ -135,8 +135,10 @@ class SynwayGateway {
 
 	/**
 	 * Send multiple SMS messages
+	 * @param {Array} recipients - Array of recipients with phone and message
+	 * @param {Number} delayMs - Delay in milliseconds between each SMS (default: 6000ms)
 	 */
-	async sendBulkSMS(recipients) {
+	async sendBulkSMS(recipients, delayMs = 6000) {
 		const results = []
 
 		for (const recipient of recipients) {
@@ -147,8 +149,10 @@ class SynwayGateway {
 				...result,
 			})
 
-			// Small delay between messages to avoid overwhelming the gateway
-			await this.delay(100)
+			// Configurable delay between messages to avoid overwhelming the gateway
+			if (delayMs > 0) {
+				await this.delay(delayMs)
+			}
 		}
 
 		return results
@@ -330,6 +334,87 @@ class SynwayGateway {
 	 */
 	delay(ms) {
 		return new Promise((resolve) => setTimeout(resolve, ms))
+	}
+
+	/**
+	 * Query received SMS messages
+	 * Endpoint: POST http://GateWayIP/API/QueryInfo
+	 * Event: queryrxsms
+	 * @param {string} begintime - Start time in format YYYYMMDDHHmmss
+	 * @param {string} endtime - End time in format YYYYMMDDHHmmss
+	 * @param {string} port - Port number (optional, -1 for all ports)
+	 */
+	async queryReceivedSMS(begintime, endtime, port = '-1') {
+		try {
+			const url = `${this.baseUrl}/API/QueryInfo`
+			const data = {
+				event: 'queryrxsms',
+				begintime: begintime,
+				endtime: endtime,
+				port: port,
+			}
+
+			const response = await axios.post(url, data, {
+				timeout: 30000,
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				auth: {
+					username: this.username,
+					password: this.password,
+				},
+			})
+
+			return {
+				success: response.data && response.data.result === 'ok',
+				data: response.data,
+				messages: this.parseReceivedMessages(response.data),
+			}
+		} catch (error) {
+			console.error(`Error querying received SMS:`, error.message)
+			return {
+				success: false,
+				error: error.message,
+				messages: [],
+			}
+		}
+	}
+
+	/**
+	 * Parse received SMS messages from API response
+	 */
+	parseReceivedMessages(responseData) {
+		if (
+			!responseData ||
+			responseData.result !== 'ok' ||
+			!responseData.content
+		) {
+			return []
+		}
+
+		try {
+			// The content field contains the SMS messages
+			// Format varies, but typically includes arrays of message data
+			const messages = []
+
+			if (Array.isArray(responseData.content)) {
+				responseData.content.forEach((item) => {
+					if (item.smsinfo) {
+						messages.push({
+							phone: item.num || item.srcnum || '',
+							message: item.smsinfo,
+							time: item.time || item.rxtime || '',
+							port: item.port || '',
+						})
+					}
+				})
+			}
+
+			return messages
+		} catch (error) {
+			console.error('Error parsing received messages:', error)
+			return []
+		}
 	}
 }
 

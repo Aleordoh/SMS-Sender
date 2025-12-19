@@ -5,193 +5,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %></title>
+  <link rel="stylesheet" href="/css/main.css">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-      padding: 40px;
-    }
-
-    h1 {
-      color: #333;
-      margin-bottom: 10px;
-      font-size: 28px;
-    }
-
-    h2 {
-      color: #555;
-      margin-bottom: 20px;
-      font-size: 18px;
-      font-weight: normal;
-    }
-
-    .nav {
-      margin-bottom: 30px;
-      padding-bottom: 20px;
-      border-bottom: 2px solid #f0f0f0;
-    }
-
-    .nav a {
-      display: inline-block;
-      padding: 10px 20px;
-      margin-right: 10px;
-      background: #667eea;
-      color: white;
-      text-decoration: none;
-      border-radius: 5px;
-      transition: background 0.3s;
-    }
-
-    .nav a:hover {
-      background: #764ba2;
-    }
-
-    .info-box {
-      background: #f8f9fa;
-      padding: 20px;
-      border-radius: 5px;
-      margin-bottom: 30px;
-    }
-
-    .info-box h3 {
-      color: #667eea;
-      margin-bottom: 15px;
-    }
-
-    .config-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid #e0e0e0;
-    }
-
-    .config-item:last-child {
-      border-bottom: none;
-    }
-
-    .config-label {
-      font-weight: 500;
-      color: #555;
-    }
-
-    .config-value {
-      color: #333;
-      font-family: monospace;
-    }
-
-    .api-docs {
-      background: #fff8e1;
-      padding: 20px;
-      border-radius: 5px;
-      border: 2px solid #ffc107;
-    }
-
-    .api-docs h3 {
-      color: #f57c00;
-      margin-bottom: 15px;
-    }
-
-    .api-docs p {
-      color: #666;
-      line-height: 1.6;
-      margin-bottom: 10px;
-    }
-
-    .api-docs code {
-      background: white;
-      padding: 2px 6px;
-      border-radius: 3px;
-      color: #d32f2f;
-      font-family: monospace;
-    }
-
-    .test-section {
-      margin-top: 30px;
-    }
-
-    .test-form {
-      background: #f8f9fa;
-      padding: 20px;
-      border-radius: 5px;
-    }
-
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 5px;
-      color: #555;
-      font-weight: 500;
-    }
-
-    input[type="text"],
-    input[type="number"],
-    input[type="password"] {
+    select {
       width: 100%;
       padding: 10px;
       border: 2px solid #e0e0e0;
       border-radius: 5px;
-      font-size: 14px;
-    }
-
-    button {
-      padding: 12px 30px;
-      background: #667eea;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    button:hover {
-      background: #764ba2;
-    }
-
-    #testResult {
-      margin-top: 15px;
-      padding: 15px;
-      border-radius: 5px;
-      display: none;
-    }
-
-    #testResult.success {
-      background: #e8f5e9;
-      color: #2e7d32;
-      border: 2px solid #4caf50;
-    }
-
-    #testResult.error {
-      background: #ffebee;
-      color: #c62828;
-      border: 2px solid #f44336;
-    }
-
-    footer {
-      margin-top: 40px;
-      padding-top: 20px;
-      border-top: 2px solid #f0f0f0;
-      text-align: center;
-      color: #999;
       font-size: 14px;
     }
   </style>
@@ -224,6 +44,10 @@
       <div class="config-item">
         <span class="config-label">Usuario:</span>
         <span class="config-value"><%= config.username %></span>
+      </div>
+      <div class="config-item">
+        <span class="config-label">Delay entre envíos:</span>
+        <span class="config-value"><%= config.sms_delay || 6000 %> ms</span>
       </div>
     </div>
 
@@ -268,6 +92,11 @@
           <div class="form-group">
             <label for="test_password">Contraseña:</label>
             <input type="password" id="test_password" name="gateway_password" value="<%= config.password %>" required>
+          </div>
+          <div class="form-group">
+            <label for="test_delay">⏱️ Delay entre envíos (ms):</label>
+            <input type="number" id="test_delay" name="sms_delay" value="<%= config.sms_delay || 6000 %>" min="0" max="10000" required>
+            <small style="color: #666; display: block; margin-top: 5px;">Tiempo de espera entre cada SMS (0-10000ms). Recomendado: 6000ms (6 segundos)</small>
           </div>
           <button type="submit">Probar Conexión</button>
         </form>

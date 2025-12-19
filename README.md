@@ -6,9 +6,12 @@ Sistema de envío masivo de SMS para el Gateway Synway SMG4008-8WA utilizando Ex
 
 - 📤 Envío masivo de SMS a través del Gateway Synway SMG4008-8WA
 - 📁 Soporte para archivos XLSX y CSV
-- 🎨 Interfaz web moderna con EJS templates
+- 🎨 Interfaz web moderna con EJS templates y CSS separados
 - ⚙️ Configuración flexible del gateway
+- ⏱️ **Delay configurable entre envíos** para evitar saturar el gateway
 - 📊 Resultados detallados del envío
+- 📨 **Consulta de respuestas SMS recibidas**
+- 📥 **Descarga de respuestas en formato CSV**
 - ✅ Validación de números y mensajes
 
 ## Requisitos
@@ -39,8 +42,11 @@ GATEWAY_HOST=192.168.1.100
 GATEWAY_PORT=80
 GATEWAY_USERNAME=admin
 GATEWAY_PASSWORD=admin
+SMS_DELAY=6000
 PORT=3000
 ```
+
+Ver `.env.example` para todas las opciones disponibles.
 
 ## Uso
 
@@ -97,7 +103,19 @@ Puedes probar la conexión con el gateway en la sección de configuración:
 
 1. Ir a `http://localhost:3000/sms/config`
 2. Ingresar los datos del gateway
-3. Hacer clic en "Probar Conexión"
+3. Ajustar el delay entre envíos (recomendado: 6000ms / 6 segundos)
+4. Hacer clic en "Probar Conexión"
+
+### Consultar respuestas SMS
+
+Después de enviar SMS, puedes consultar las respuestas recibidas:
+
+1. En la página de resultados, desplázate a "📨 Consultar Respuestas SMS"
+2. Selecciona el período de tiempo (últimas 1, 3, 6, 12 o 24 horas)
+3. Haz clic en "🔍 Consultar Respuestas"
+4. Si hay respuestas, puedes descargarlas en formato CSV con el botón "📥 Descargar Respuestas (CSV)"
+
+**Nota:** Esta funcionalidad consulta directamente el gateway Synway para obtener los SMS recibidos.
 
 ## API del Gateway Synway
 
@@ -123,6 +141,17 @@ El sistema utiliza la **API HTTP v1.8.0** del Gateway Synway SMG4008-8WA:
 ```json
 {
 	"event": "getportinfo"
+}
+```
+
+**3. Consultar SMS recibidos** - `POST http://[host]:[port]/API/QueryInfo`
+
+```json
+{
+	"event": "queryrxsms",
+	"begintime": "20231219180000",
+	"endtime": "20231219190000",
+	"port": "-1"
 }
 ```
 
@@ -152,9 +181,12 @@ SMS-Sender/
 │   └── sms.js                 # Rutas de la aplicación
 ├── views/
 │   ├── upload.ejs             # Vista de carga de archivos
-│   ├── results.ejs            # Vista de resultados
+│   ├── results.ejs            # Vista de resultados con consulta de respuestas
 │   └── config.ejs             # Vista de configuración
 ├── public/
+│   ├── css/
+│   │   ├── main.css           # Estilos principales
+│   │   └── results.css        # Estilos de resultados
 │   └── uploads/               # Directorio temporal de archivos
 └── examples/
     └── sample.csv             # Archivo de ejemplo
@@ -186,8 +218,13 @@ SMS-Sender/
 ## Limitaciones conocidas
 
 - Los mensajes están limitados a 160 caracteres (estándar SMS)
-- El sistema procesa los SMS de forma secuencial para evitar saturar el gateway
+- El sistema procesa los SMS de forma secuencial con un delay configurable (por defecto 6000ms / 6 segundos)
 - El gateway debe ser accesible desde el servidor donde se ejecuta la aplicación
+- El formato de las respuestas SMS recibidas puede variar según la configuración del gateway
+
+## Actualizaciones Recientes
+
+Ver [UPDATES.md](UPDATES.md) para un resumen detallado de las últimas actualizaciones implementadas.
 
 ## Licencia
 

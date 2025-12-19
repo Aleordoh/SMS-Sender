@@ -20,17 +20,20 @@ Sistema de envío masivo de SMS para el Gateway Synway SMG4008-8WA utilizando Ex
 ## Instalación
 
 1. Clonar el repositorio:
+
 ```bash
 git clone https://github.com/Aleordoh/SMS-Sender.git
 cd SMS-Sender
 ```
 
 2. Instalar dependencias:
+
 ```bash
 npm install
 ```
 
 3. (Opcional) Configurar variables de entorno en un archivo `.env`:
+
 ```env
 GATEWAY_HOST=192.168.1.100
 GATEWAY_PORT=80
@@ -48,6 +51,7 @@ node app.js
 ```
 
 O con npm:
+
 ```bash
 npm start
 ```
@@ -59,10 +63,12 @@ El servidor se iniciará en `http://localhost:3000`
 Crea un archivo CSV o XLSX con las siguientes columnas:
 
 **Columnas requeridas:**
+
 - `phone` (o `telephone`, `number`, `telefono`): Número de teléfono del destinatario
 - `message` (o `text`, `sms`, `mensaje`): Mensaje a enviar
 
 **Ejemplo CSV:**
+
 ```csv
 phone,message
 1234567890,Hola! Este es un mensaje de prueba
@@ -70,10 +76,10 @@ phone,message
 ```
 
 **Ejemplo XLSX:**
-| phone      | message                          |
+| phone | message |
 |------------|----------------------------------|
 | 1234567890 | Hola! Este es un mensaje de prueba |
-| 9876543210 | Bienvenido a nuestro servicio    |
+| 9876543210 | Bienvenido a nuestro servicio |
 
 Ver archivo de ejemplo en `examples/sample.csv`
 
@@ -88,6 +94,7 @@ Ver archivo de ejemplo en `examples/sample.csv`
 ### Probar conexión
 
 Puedes probar la conexión con el gateway en la sección de configuración:
+
 1. Ir a `http://localhost:3000/sms/config`
 2. Ingresar los datos del gateway
 3. Hacer clic en "Probar Conexión"
@@ -99,6 +106,7 @@ El sistema utiliza la API HTTP del Gateway Synway SMG4008-8WA:
 **Endpoint:** `http://[host]:[port]/sendSMS`
 
 **Parámetros:**
+
 - `username`: Usuario del gateway
 - `password`: Contraseña del gateway
 - `to`: Número de teléfono destino

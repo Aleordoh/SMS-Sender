@@ -1,31 +1,32 @@
 {
-  "name": "sms-sender",
-  "version": "1.0.0",
-  "description": "Sistema de envio de sms masivos",
-  "main": "app.js",
-  "scripts": {
-    "start": "node app.js",
-    "dev": "node app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Aleordoh/SMS-Sender.git"
-  },
-  "author": "Martin Orodoñéz",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Aleordoh/SMS-Sender/issues"
-  },
-  "homepage": "https://github.com/Aleordoh/SMS-Sender#readme",
-  "keywords": [],
-  "dependencies": {
-    "axios": "^1.13.2",
-    "csv-parser": "^3.2.0",
-    "ejs": "^3.1.10",
-    "express": "^5.1.0",
-    "express-rate-limit": "^8.2.1",
-    "multer": "^2.0.2",
-    "xlsx": "^0.18.5"
-  }
+	"name": "sms-sender",
+	"version": "1.0.0",
+	"description": "Sistema de envio de sms masivos",
+	"main": "app.js",
+	"scripts": {
+		"start": "node app.js",
+		"dev": "node app.js",
+		"test": "node test_gateway.js",
+		"test:sms": "TEST_PHONE=$PHONE node test_gateway.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Aleordoh/SMS-Sender.git"
+	},
+	"author": "Martin Orodoñéz",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/Aleordoh/SMS-Sender/issues"
+	},
+	"homepage": "https://github.com/Aleordoh/SMS-Sender#readme",
+	"keywords": [],
+	"dependencies": {
+		"axios": "^1.13.2",
+		"csv-parser": "^3.2.0",
+		"ejs": "^3.1.10",
+		"express": "^5.1.0",
+		"express-rate-limit": "^8.2.1",
+		"multer": "^2.0.2",
+		"xlsx": "^0.18.5"
+	}
 }

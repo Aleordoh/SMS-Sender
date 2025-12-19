@@ -101,18 +101,41 @@ Puedes probar la conexión con el gateway en la sección de configuración:
 
 ## API del Gateway Synway
 
-El sistema utiliza la API HTTP del Gateway Synway SMG4008-8WA:
+El sistema utiliza la **API HTTP v1.8.0** del Gateway Synway SMG4008-8WA:
 
-**Endpoint:** `http://[host]:[port]/sendSMS`
+### Endpoints principales:
 
-**Parámetros:**
+**1. Enviar SMS** - `POST http://[host]:[port]/API/TaskHandle`
 
-- `username`: Usuario del gateway
-- `password`: Contraseña del gateway
-- `to`: Número de teléfono destino
-- `text`: Mensaje a enviar (URL encoded)
+```json
+{
+	"event": "txsms",
+	"userid": "0",
+	"num": "1234567890",
+	"port": "-1",
+	"encoding": "0",
+	"smsinfo": "Hola Mundo!"
+}
+```
 
-**Documentación oficial:** [Manual Synway SMG4008-8WA](https://www.synway.net/Download/Manual/UserManual/SMG_Wireless_Gateway_ManualV2.2.0.pdf)
+**2. Consultar información** - `POST http://[host]:[port]/API/QueryInfo`
+
+```json
+{
+	"event": "getportinfo"
+}
+```
+
+### Autenticación:
+
+- **Método**: HTTP Basic Authentication
+- **Usuario**: Configurado en el gateway (default: `ApiUserAdmin`)
+- **Contraseña**: Configurada en el gateway
+
+### Documentación completa:
+
+- Ver [API_ENDPOINTS.md](API_ENDPOINTS.md) para documentación detallada de todos los endpoints
+- Manual oficial incluido en: `manual/SMG_Wireless_Gateway_APIv1.8.0.pdf`
 
 ## Estructura del proyecto
 

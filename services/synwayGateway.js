@@ -50,42 +50,51 @@ class SynwayGateway {
 
 	/**
 	 * Send SMS using HTTP API
-	 * According to Synway documentation, the HTTP API format is:
-	 * http://ip:port/API/TaskHandle
+	 * According to Synway SMG Gateway API v1.8.0 documentation:
+	 * POST http://GateWayIP/API/TaskHandle
+	 * Format: {"event":"txsms","userid":"...","num":"...","port":"...","encoding":"...","smsinfo":"..."}
 	 */
-	async sendSMS(phoneNumber, message) {
+	async sendSMS(phoneNumber, message, options = {}) {
 		try {
-			// Format for /API/TaskHandle
-			const data = {
-				op: 'SmsSend',
-				username: this.username,
-				password: this.password,
-				dst: phoneNumber,
-				msg: message,
-			}
-
 			const url = `${this.baseUrl}${this.smsEndpoint}`
 
-			// Convert to URLSearchParams to send as application/x-www-form-urlencoded
-			// Many hardware gateways do not support JSON payloads
-			const params = new URLSearchParams()
-			params.append('op', 'SmsSend')
-			params.append('username', this.username)
-			params.append('password', this.password)
-			params.append('dst', phoneNumber)
-			params.append('msg', message)
+			// Prepare data according to API v1.8.0 spec
+			// event: "txsms" - Send SMS
+			// userid: User ID for tracking (optional)
+			// num: Destination number(s), separated by comma
+			// port: Port to use (-1 for auto, or specific port like "1,2,3")
+			// encoding: 0 for bit7 (ASCII), 8 for UCS-2 (Unicode)
+			// smsinfo: Message content (max 600 chars for bit7, 300 for UCS-2)
+			const data = {
+				event: 'txsms',
+				userid: options.userid || '0',
+				num: phoneNumber,
+				port: options.port || '-1',
+				encoding: this.detectEncoding(message),
+				smsinfo: message,
+			}
 
-			const response = await axios.post(url, params, {
+			const response = await axios.post(url, data, {
 				timeout: 30000,
 				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded',
+					'Content-Type': 'application/json',
+				},
+				auth: {
+					username: this.username,
+					password: this.password,
 				},
 			})
 
+			// Response format: {"result":"ok","content":"taskid:0"} or {"result":"error","content":"error reason"}
+			const isSuccess =
+				response.data &&
+				(response.data.result === 'ok' || response.status === 200)
+
 			return {
-				success: true,
+				success: isSuccess,
 				data: response.data,
 				status: response.status,
+				taskid: this.extractTaskId(response.data),
 			}
 		} catch (error) {
 			console.error(`Error sending SMS to ${phoneNumber}:`, error.message)
@@ -95,6 +104,33 @@ class SynwayGateway {
 				phoneNumber: phoneNumber,
 			}
 		}
+	}
+
+	/**
+	 * Detect message encoding
+	 * Returns "0" for ASCII (bit7) or "8" for Unicode (UCS-2)
+	 */
+	detectEncoding(message) {
+		// Check if message contains non-ASCII characters
+		const hasUnicode = /[^\x00-\x7F]/.test(message)
+		return hasUnicode ? '8' : '0'
+	}
+
+	/**
+	 * Extract task ID from response
+	 * Response format: {"result":"ok","content":"taskid:123"}
+	 */
+	extractTaskId(responseData) {
+		if (
+			!responseData ||
+			!responseData.content ||
+			responseData.result !== 'ok'
+		) {
+			return null
+		}
+
+		const match = responseData.content.match(/taskid:(\d+)/)
+		return match ? match[1] : null
 	}
 
 	/**
@@ -119,24 +155,167 @@ class SynwayGateway {
 	}
 
 	/**
+	 * Query SMS sending result
+	 * Endpoint: POST http://GateWayIP/API/QueryInfo
+	 * Event: querytxsms
+	 */
+	async querySMSResult(taskid) {
+		try {
+			const url = `${this.baseUrl}/API/QueryInfo`
+			const data = {
+				event: 'querytxsms',
+				taskid: taskid.toString(),
+			}
+
+			const response = await axios.post(url, data, {
+				timeout: 10000,
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				auth: {
+					username: this.username,
+					password: this.password,
+				},
+			})
+
+			return {
+				success: response.data && response.data.result === 'ok',
+				data: response.data,
+			}
+		} catch (error) {
+			console.error(`Error querying SMS result:`, error.message)
+			return {
+				success: false,
+				error: error.message,
+			}
+		}
+	}
+
+	/**
+	 * Get port status
+	 * Endpoint: POST http://GateWayIP/API/QueryInfo
+	 * Event: getportinfo
+	 */
+	async getPortStatus() {
+		try {
+			const url = `${this.baseUrl}/API/QueryInfo`
+			const data = {
+				event: 'getportinfo',
+			}
+
+			const response = await axios.post(url, data, {
+				timeout: 10000,
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				auth: {
+					username: this.username,
+					password: this.password,
+				},
+			})
+
+			return {
+				success: response.data && response.data.result === 'ok',
+				data: response.data,
+			}
+		} catch (error) {
+			console.error(`Error getting port status:`, error.message)
+			return {
+				success: false,
+				error: error.message,
+			}
+		}
+	}
+
+	/**
+	 * Get port BS connection status
+	 * Endpoint: POST http://GateWayIP/API/QueryInfo
+	 * Event: getportconnectstate
+	 */
+	async getPortConnectionStatus() {
+		try {
+			const url = `${this.baseUrl}/API/QueryInfo`
+			const data = {
+				event: 'getportconnectstate',
+			}
+
+			const response = await axios.post(url, data, {
+				timeout: 10000,
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				auth: {
+					username: this.username,
+					password: this.password,
+				},
+			})
+
+			return {
+				success: response.data && response.data.result === 'ok',
+				data: response.data,
+			}
+		} catch (error) {
+			console.error(`Error getting port connection status:`, error.message)
+			return {
+				success: false,
+				error: error.message,
+			}
+		}
+	}
+
+	/**
+	 * Get wireless parameters information
+	 * Endpoint: POST http://GateWayIP/API/QueryInfo
+	 * Event: getwirelessinfo
+	 * @param {string} type - Type of query: "porttype", "ICCID", "IMEI", "IMSI", "PhoneNo"
+	 * @param {string} port - Port numbers separated by comma (optional)
+	 */
+	async getWirelessInfo(type, port = null) {
+		try {
+			const url = `${this.baseUrl}/API/QueryInfo`
+			const data = {
+				event: 'getwirelessinfo',
+				type: type,
+			}
+
+			if (port) {
+				data.port = port
+			}
+
+			const response = await axios.post(url, data, {
+				timeout: 10000,
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				auth: {
+					username: this.username,
+					password: this.password,
+				},
+			})
+
+			return {
+				success: response.data && response.data.result === 'ok',
+				data: response.data,
+			}
+		} catch (error) {
+			console.error(`Error getting wireless info:`, error.message)
+			return {
+				success: false,
+				error: error.message,
+			}
+		}
+	}
+
+	/**
 	 * Check gateway status
 	 */
 	async checkStatus() {
 		try {
-			const url = `${this.baseUrl}/`
-			// Consider 200 (OK), 401/403 (auth required) as reachable
-			const response = await axios.get(url, {
-				timeout: 5000,
-				validateStatus: () => true,
-			})
-
-			const reachable = [200, 401, 403].includes(response.status)
+			// Use the port status endpoint to check if gateway is alive
+			const result = await this.getPortStatus()
 			return {
-				success: reachable,
-				status: {
-					statusCode: response.status,
-					url,
-				},
+				success: result.success,
+				status: result.data,
 			}
 		} catch (error) {
 			return {

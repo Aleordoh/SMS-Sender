@@ -342,9 +342,15 @@ class SynwayGateway {
 	 * Event: queryrxsms
 	 * @param {string} begintime - Start time in format YYYYMMDDHHmmss
 	 * @param {string} endtime - End time in format YYYYMMDDHHmmss
-	 * @param {string} port - Port number (optional, -1 for all ports)
+	 * @param {string} port - Port numbers separated by comma (default: "1,2,3,4,5,6,7,8" for 8-port gateway)
+	 * @param {string} phonenum - Phone number to filter (optional)
 	 */
-	async queryReceivedSMS(begintime, endtime, port = '-1') {
+	async queryReceivedSMS(
+		begintime,
+		endtime,
+		port = '1,2,3,4,5,6,7,8',
+		phonenum = null
+	) {
 		try {
 			const url = `${this.baseUrl}/API/QueryInfo`
 			const data = {
@@ -352,6 +358,11 @@ class SynwayGateway {
 				begintime: begintime,
 				endtime: endtime,
 				port: port,
+			}
+
+			// Only add phonenum if provided
+			if (phonenum) {
+				data.phonenum = phonenum
 			}
 
 			const response = await axios.post(url, data, {
@@ -382,6 +393,8 @@ class SynwayGateway {
 
 	/**
 	 * Parse received SMS messages from API response
+	 * The Synway API returns messages in format:
+	 * "total:N;YYYYMMDDHHMMSS:PORT(X)(Y):PHONE:MESSAGE|E;..."
 	 */
 	parseReceivedMessages(responseData) {
 		if (
@@ -393,12 +406,12 @@ class SynwayGateway {
 		}
 
 		try {
-			// The content field contains the SMS messages
-			// Format varies, but typically includes arrays of message data
 			const messages = []
+			const content = responseData.content
 
-			if (Array.isArray(responseData.content)) {
-				responseData.content.forEach((item) => {
+			// If content is an array, parse it directly
+			if (Array.isArray(content)) {
+				content.forEach((item) => {
 					if (item.smsinfo) {
 						messages.push({
 							phone: item.num || item.srcnum || '',
@@ -409,10 +422,53 @@ class SynwayGateway {
 					}
 				})
 			}
+			// If content is a string (Synway format), parse it
+			else if (typeof content === 'string') {
+				// Check if there are any messages
+				const totalMatch = content.match(/total:(\d+)/)
+				if (!totalMatch || parseInt(totalMatch[1]) === 0) {
+					return []
+				}
+
+				// Format: "total:2;20251219203330:2(-1)(-1):5493815682688:Hola|E;20251219203336:2(-1)(-1):5493815682688:Quien sos|E"
+				// Split by semicolon, skip first element (total:N)
+				const parts = content.split(';').slice(1)
+
+				parts.forEach((part) => {
+					if (!part || part.trim().length === 0) return
+
+					// Each part format: YYYYMMDDHHMMSS:PORT(X)(Y):PHONE:MESSAGE|E
+					// Example: 20251219203330:2(-1)(-1):5493815682688:Hola|E
+					const segments = part.split(':')
+
+					if (segments.length >= 4) {
+						const time = segments[0] // YYYYMMDDHHMMSS
+						const portInfo = segments[1] // 2(-1)(-1)
+						const phone = segments[2] // 5493815682688
+						// Message may contain colons, so join remaining segments
+						const messageWithFlag = segments.slice(3).join(':') // Hola|E
+
+						// Extract port number (first digit(s) before parenthesis)
+						const portMatch = portInfo.match(/^(\d+)/)
+						const port = portMatch ? portMatch[1] : ''
+
+						// Remove |E flag from message
+						const message = messageWithFlag.replace(/\|E$/, '')
+
+						messages.push({
+							phone: phone.trim(),
+							message: message.trim(),
+							time: time.trim(),
+							port: port,
+						})
+					}
+				})
+			}
 
 			return messages
 		} catch (error) {
 			console.error('Error parsing received messages:', error)
+			console.error('Response data:', JSON.stringify(responseData))
 			return []
 		}
 	}

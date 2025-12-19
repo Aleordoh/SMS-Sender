@@ -159,7 +159,7 @@ class SMSController {
 	 */
 	static async queryReceivedSMS(req, res) {
 		try {
-			const { begintime, endtime, port } = req.body
+			const { begintime, endtime, port, phonenum } = req.body
 
 			const gatewayConfig = {
 				host: process.env.GATEWAY_HOST || '192.168.1.45',
@@ -170,7 +170,13 @@ class SMSController {
 			}
 
 			const gateway = new SynwayGateway(gatewayConfig)
-			const result = await gateway.queryReceivedSMS(begintime, endtime, port)
+			// Port defaults to "1,2,3,4,5,6,7,8" in gateway service
+			const result = await gateway.queryReceivedSMS(
+				begintime,
+				endtime,
+				port,
+				phonenum
+			)
 
 			res.json({
 				success: result.success,
@@ -187,11 +193,20 @@ class SMSController {
 	}
 
 	/**
+	 * Show inbox page for monitoring received messages
+	 */
+	static showInbox(req, res) {
+		res.render('inbox', {
+			title: 'Mensajes Recibidos - SMS Sender',
+		})
+	}
+
+	/**
 	 * Download received SMS as CSV
 	 */
 	static async downloadReceivedSMS(req, res) {
 		try {
-			const { begintime, endtime, port } = req.query
+			const { begintime, endtime, port, phonenum } = req.query
 
 			const gatewayConfig = {
 				host: process.env.GATEWAY_HOST || '192.168.1.45',
@@ -202,7 +217,13 @@ class SMSController {
 			}
 
 			const gateway = new SynwayGateway(gatewayConfig)
-			const result = await gateway.queryReceivedSMS(begintime, endtime, port)
+			// Port defaults to "1,2,3,4,5,6,7,8" in gateway service
+			const result = await gateway.queryReceivedSMS(
+				begintime,
+				endtime,
+				port,
+				phonenum
+			)
 
 			if (!result.success || result.messages.length === 0) {
 				return res.status(404).send('No messages found')

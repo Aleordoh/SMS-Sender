@@ -57,6 +57,7 @@ router.post(
 	SMSController.processUpload
 )
 router.get('/config', SMSController.showConfig)
+router.get('/inbox', SMSController.showInbox)
 router.post('/test-connection', testLimiter, SMSController.testConnection)
 router.post('/query-received', SMSController.queryReceivedSMS)
 router.get('/download-received', SMSController.downloadReceivedSMS)

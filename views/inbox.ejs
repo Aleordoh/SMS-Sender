@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/results.css">
+  <style>
+    .inbox-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 10px;
+      color: white;
+    }
+
+    .inbox-stats {
+      display: flex;
+      gap: 30px;
+      font-size: 14px;
+    }
+
+    .inbox-stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .inbox-stat-label {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .inbox-stat-value {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .auto-refresh-controls {
+      background: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .refresh-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked+.slider {
+      background-color: #4caf50;
+    }
+
+    input:checked+.slider:before {
+      transform: translateX(26px);
+    }
+
+    .time-range-selector {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .time-range-selector select {
+      padding: 8px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 5px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .refresh-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .spinner {
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #4caf50;
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      animation: spin 1s linear infinite;
+      display: none;
+    }
+
+    .spinner.active {
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .message-row {
+      transition: background-color 0.3s;
+    }
+
+    .message-row.new-message {
+      background-color: #e8f5e9;
+      animation: highlight 2s ease-in-out;
+    }
+
+    @keyframes highlight {
+      0% {
+        background-color: #c8e6c9;
+      }
+
+      100% {
+        background-color: transparent;
+      }
+    }
+
+    .empty-inbox {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+
+    .empty-inbox-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+
+    .alert {
+      padding: 15px 20px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+
+    .alert-info {
+      background-color: #e3f2fd;
+      color: #1976d2;
+      border-left: 4px solid #1976d2;
+    }
+
+    .alert-error {
+      background-color: #ffebee;
+      color: #c62828;
+      border-left: 4px solid #c62828;
+    }
+
+    .notification-badge {
+      background-color: #f44336;
+      color: white;
+      border-radius: 50%;
+      padding: 2px 8px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+
+    .messages-table {
+      width: 100%;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .messages-table th {
+      background-color: #667eea;
+      color: white;
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .messages-table td {
+      padding: 15px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .messages-table tbody tr:hover {
+      background-color: #f5f5f5;
+    }
+
+    .phone-number {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .message-text {
+      max-width: 400px;
+      word-wrap: break-word;
+    }
+
+    .message-time {
+      color: #666;
+      font-size: 13px;
+    }
+
+    .port-badge {
+      background-color: #e0e0e0;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .button-secondary {
+      background-color: #6c757d;
+    }
+
+    .button-secondary:hover {
+      background-color: #5a6268;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container wide">
+    <div class="nav">
+      <a href="/sms">📤 Enviar SMS</a>
+      <a href="/sms/inbox" class="active">📨 Mensajes Recibidos</a>
+      <a href="/sms/config">⚙️ Configuración</a>
+    </div>
+
+    <div class="inbox-header">
+      <div>
+        <h1 style="margin: 0;">📨 Mensajes Recibidos</h1>
+        <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 14px;">Monitoreo en tiempo real de respuestas SMS</p>
+      </div>
+      <div class="inbox-stats">
+        <div class="inbox-stat-item">
+          <span class="inbox-stat-label">Total Mensajes</span>
+          <span class="inbox-stat-value" id="totalMessages">0</span>
+        </div>
+        <div class="inbox-stat-item">
+          <span class="inbox-stat-label">Última Actualización</span>
+          <span class="inbox-stat-value" id="lastUpdate" style="font-size: 14px;">--:--:--</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="auto-refresh-controls">
+      <div class="refresh-toggle">
+        <label class="switch">
+          <input type="checkbox" id="autoRefreshToggle" checked>
+          <span class="slider"></span>
+        </label>
+        <span><strong>Actualización Automática</strong></span>
+      </div>
+
+      <div class="time-range-selector">
+        <label>Mostrar últimas:</label>
+        <select id="timeRange">
+          <option value="1">1 hora</option>
+          <option value="3">3 horas</option>
+          <option value="6" selected>6 horas</option>
+          <option value="12">12 horas</option>
+          <option value="24">24 horas</option>
+          <option value="72">3 días</option>
+          <option value="168">7 días</option>
+        </select>
+      </div>
+
+      <div class="refresh-status">
+        <div class="spinner" id="loadingSpinner"></div>
+        <span id="refreshStatus">Esperando...</span>
+        <button onclick="manualRefresh()" class="button" style="padding: 8px 20px;">🔄 Actualizar Ahora</button>
+      </div>
+    </div>
+
+    <div id="messagesContainer">
+      <div class="empty-inbox">
+        <div class="empty-inbox-icon">📭</div>
+        <p>No hay mensajes recibidos</p>
+        <p style="font-size: 14px; color: #bbb;">Los mensajes aparecerán aquí automáticamente</p>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <button onclick="downloadMessages()" class="button button-secondary" id="downloadBtn" style="display: none;">
+        📥 Descargar CSV
+      </button>
+      <button onclick="clearMessages()" class="button button-secondary" id="clearBtn" style="display: none;">
+        🗑️ Limpiar Vista
+      </button>
+    </div>
+
+    <footer>
+      <p>SMS Sender - Synway SMG4008-8WA Gateway</p>
+    </footer>
+  </div>
+
+  <script>
+    let autoRefreshInterval = null;
+    let lastQueryParams = null;
+    let knownMessageIds = new Set();
+    let allMessages = [];
+
+    // Auto-refresh toggle
+    document.getElementById('autoRefreshToggle').addEventListener('change', (e) => {
+      if (e.target.checked) {
+        startAutoRefresh();
+      } else {
+        stopAutoRefresh();
+      }
+    });
+
+    // Time range change
+    document.getElementById('timeRange').addEventListener('change', () => {
+      manualRefresh();
+    });
+
+    function startAutoRefresh() {
+      stopAutoRefresh();
+      updateStatus('Auto-actualización activada');
+      loadMessages();
+      autoRefreshInterval = setInterval(() => {
+        loadMessages();
+      }, 30000); // Cada 30 segundos
+    }
+
+    function stopAutoRefresh() {
+      if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+        autoRefreshInterval = null;
+      }
+      updateStatus('Auto-actualización desactivada');
+    }
+
+    function manualRefresh() {
+      updateStatus('Actualizando...');
+      loadMessages();
+    }
+
+    function updateStatus(message) {
+      document.getElementById('refreshStatus').textContent = message;
+    }
+
+    function showSpinner() {
+      document.getElementById('loadingSpinner').classList.add('active');
+    }
+
+    function hideSpinner() {
+      document.getElementById('loadingSpinner').classList.remove('active');
+    }
+
+    function getTimeRange(hours) {
+      const now = new Date();
+      const past = new Date(now.getTime() - hours * 60 * 60 * 1000);
+
+      function formatTime(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hour = String(date.getHours()).padStart(2, '0');
+        const min = String(date.getMinutes()).padStart(2, '0');
+        const sec = String(date.getSeconds()).padStart(2, '0');
+        return `${year}${month}${day}${hour}${min}${sec}`;
+      }
+
+      return {
+        begintime: formatTime(past),
+        endtime: formatTime(now)
+      };
+    }
+
+    function formatDateTime(dateStr) {
+      if (!dateStr) return 'N/A';
+      try {
+        const year = dateStr.substr(0, 4);
+        const month = dateStr.substr(4, 2);
+        const day = dateStr.substr(6, 2);
+        const hour = dateStr.substr(8, 2);
+        const min = dateStr.substr(10, 2);
+        const sec = dateStr.substr(12, 2);
+        return `${day}/${month}/${year} ${hour}:${min}:${sec}`;
+      } catch (e) {
+        return dateStr;
+      }
+    }
+
+    function generateMessageId(msg) {
+      return `${msg.phone}_${msg.time}_${msg.message}`;
+    }
+
+    async function loadMessages() {
+      showSpinner();
+
+      const hours = parseInt(document.getElementById('timeRange').value);
+      const timeRange = getTimeRange(hours);
+      // Don't include port parameter - let API query all ports
+      lastQueryParams = {
+        ...timeRange
+      };
+
+      try {
+        const response = await fetch('/sms/query-received', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(lastQueryParams)
+        });
+
+        const result = await response.json();
+
+        if (result.success && result.messages && result.messages.length > 0) {
+          // Detectar nuevos mensajes
+          const newMessages = result.messages.filter(msg => {
+            const msgId = generateMessageId(msg);
+            return !knownMessageIds.has(msgId);
+          });
+
+          // Actualizar conjunto de IDs conocidos
+          result.messages.forEach(msg => {
+            knownMessageIds.add(generateMessageId(msg));
+          });
+
+          allMessages = result.messages;
+          displayMessages(result.messages, newMessages.map(generateMessageId));
+
+          const now = new Date();
+          document.getElementById('lastUpdate').textContent =
+            `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+          document.getElementById('totalMessages').textContent = result.messages.length;
+
+          updateStatus(`${result.messages.length} mensajes cargados`);
+
+          // Mostrar notificación si hay mensajes nuevos
+          if (newMessages.length > 0) {
+            showNotification(`¡${newMessages.length} nuevo(s) mensaje(s)!`);
+          }
+        } else {
+          displayEmptyState();
+          document.getElementById('totalMessages').textContent = '0';
+          updateStatus('Sin mensajes en el período seleccionado');
+        }
+      } catch (error) {
+        displayError(error.message);
+        updateStatus('Error al cargar mensajes');
+      } finally {
+        hideSpinner();
+      }
+    }
+
+    function displayMessages(messages, newMessageIds = []) {
+      const container = document.getElementById('messagesContainer');
+
+      let html = '<table class="messages-table">';
+      html += '<thead><tr><th>#</th><th>Teléfono</th><th>Mensaje</th><th>Fecha/Hora</th><th>Puerto</th></tr></thead>';
+      html += '<tbody>';
+
+      // Ordenar por tiempo (más recientes primero)
+      const sortedMessages = [...messages].sort((a, b) => {
+        return (b.time || '').localeCompare(a.time || '');
+      });
+
+      sortedMessages.forEach((msg, index) => {
+        const msgId = generateMessageId(msg);
+        const isNew = newMessageIds.includes(msgId);
+        const rowClass = isNew ? 'message-row new-message' : 'message-row';
+
+        html += `<tr class="${rowClass}">
+          <td>${index + 1}</td>
+          <td class="phone-number">${msg.phone || 'N/A'}</td>
+          <td class="message-text">${msg.message || 'N/A'}</td>
+          <td class="message-time">${formatDateTime(msg.time)}</td>
+          <td><span class="port-badge">Puerto ${msg.port || 'N/A'}</span></td>
+        </tr>`;
+      });
+
+      html += '</tbody></table>';
+      container.innerHTML = html;
+
+      document.getElementById('downloadBtn').style.display = 'inline-block';
+      document.getElementById('clearBtn').style.display = 'inline-block';
+    }
+
+    function displayEmptyState() {
+      const container = document.getElementById('messagesContainer');
+      container.innerHTML = `
+        <div class="empty-inbox">
+          <div class="empty-inbox-icon">📭</div>
+          <p>No hay mensajes recibidos</p>
+          <p style="font-size: 14px; color: #bbb;">Los mensajes aparecerán aquí automáticamente</p>
+        </div>
+      `;
+      document.getElementById('downloadBtn').style.display = 'none';
+      document.getElementById('clearBtn').style.display = 'none';
+    }
+
+    function displayError(errorMessage) {
+      const container = document.getElementById('messagesContainer');
+      container.innerHTML = `
+        <div class="alert alert-error">
+          <strong>Error:</strong> ${errorMessage}
+        </div>
+      `;
+    }
+
+    function showNotification(message) {
+      // Sonido de notificación (opcional)
+      try {
+        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZUQ0PU6zl7K1aGA1Bq+Lwu3ElBziR1/LLeysFJHfH8N2PQQoUXrTp66hVEwpHn+DyvmwhBTGH0fPTgjMGHm7A7+OZUQ0PU6zl7K1aGA1Bq+Lwu3ElBziR1/LLeysFJHfH8N2PQQoUXrTp66hVFApHn+DyvmwhBTGH0fPTgjMGHm7A7+OZUQ0PU6zl7K1aGA1Bq+Lwu3ElBziR1/LLeysFJHfH8N2PQQoUXrTp66hVFApHn+DyvmwhBTGH0fPTgjMGHm7A7+OZUQ0PU6zl7K1aGA1Bq+Lwu3ElBziR1/LLeysFJHfH8N2PQQoUXrTp66hVFApHn+DyvmwhBTGH0fPTgjMGHm7A7+OZUQ0PU6zl7K1aGA1Bq+Lwu3ElBziR1/LLeysFJHfH8N2PQQoUXrTp66hVFApHn+DyvmwhBTGH0fPTgjMGHm7A7+OZUQ0PU6zl7K1aGA1Bq+Lwu3ElBziR1/LLeysFJHfH8N2PQQoUXrTp66hVFApHn+DyvmwhBTGH0fPTgjMGHm7A7+OZUQ0PU6zl7K1aGA1Bq+Lwu3ElBziR1/LLeysFJHfH8N2PQQoUXrTp66hVFApHn+DyvmwhBTGH0fPTgjMGHm7A7+OZUQ0PU6zl7K1aGA1Bq+Lwu3ElBziR1/LLeysFJHfH8N2PQQoUXrTp66hVFApHn+DyvmwhBTGH0fPTgjMGHm7A7+OZUQ0PU6zl7K1aGA1Bq+Lwu3ElBziR1/LLeysFJHfH8N2PQQoUXrTp66hVFApHn+DyvmwhBTGH0fPTgjMGHm7A7+OZUQ0PU6zl7K1aGA1Bq+Lwu3ElBziR1/LLeysFJHfH8N2PQQoUXrTp66hVFApHn+DyvmwhBTGH0fPTgjMGHm7A7+OZUQ0PU6zl7K1aGA1Bq+Lwu3ElBziR1/LLeysFJHfH8N2PQQoUXrTp66hVFApHn+DyvmwhBTGH0fPTgjMGHm7A7+OZUQ0PU6zl7K1aGA1Bq+Lwu3ElBziR1/LLeysFJHfH8N2PQQoUXrTp66hVFApHn+DyvmwhBTGH0fPTgjMGHm7A7+OZUQ0PU6zl7K1aGA1Bq+Lwu3ElBziR1/LLeysFJHfH8N2PQQoUXrTp66hVFApHn+DyvmwhBTGH0fPTgjMGHm7A7+OZUQ0PU6zl7K1aGA1Bq+Lwu3ElBziR1/LLeysFJHfH8N2PQQoUXrTp66hVFApHn+DyvmwhBTGH0fPTgjMGHm7A7+OZUQ0PU6zl7K1aGA1Bq+Lwu3El');
+        audio.volume = 0.3;
+        audio.play().catch(() => {});
+      } catch (e) {}
+
+      // Notificación visual
+      const oldTitle = document.title;
+      document.title = `(${message}) ${oldTitle}`;
+      setTimeout(() => {
+        document.title = oldTitle;
+      }, 5000);
+    }
+
+    function downloadMessages() {
+      if (!lastQueryParams || allMessages.length === 0) return;
+
+      const params = new URLSearchParams(lastQueryParams);
+      window.location.href = `/sms/download-received?${params.toString()}`;
+    }
+
+    function clearMessages() {
+      if (confirm('¿Estás seguro de que quieres limpiar la vista? Los mensajes seguirán en el gateway.')) {
+        knownMessageIds.clear();
+        allMessages = [];
+        displayEmptyState();
+        document.getElementById('totalMessages').textContent = '0';
+        updateStatus('Vista limpiada');
+      }
+    }
+
+    // Iniciar auto-refresh al cargar la página
+    window.addEventListener('load', () => {
+      startAutoRefresh();
+    });
+
+    // Limpiar interval al cerrar
+    window.addEventListener('beforeunload', () => {
+      stopAutoRefresh();
+    });
+  </script>
+</body>
+
+</html>

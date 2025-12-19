@@ -15,6 +15,7 @@
 
     <div class="nav">
       <a href="/sms">📤 Enviar SMS</a>
+      <a href="/sms/inbox">📨 Mensajes Recibidos</a>
       <a href="/sms/config">⚙️ Configuración</a>
     </div>
 
@@ -149,9 +150,9 @@
 
       const hours = parseInt(document.getElementById('timeRange').value);
       const timeRange = getTimeRange(hours);
+      // Don't include port parameter - let API query all ports
       lastQueryParams = {
-        ...timeRange,
-        port: '-1'
+        ...timeRange
       };
 
       const resultDiv = document.getElementById('responsesResult');

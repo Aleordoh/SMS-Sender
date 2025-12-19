@@ -6,7 +6,7 @@ const axios = require('axios')
  */
 class SynwayGateway {
 	constructor(config) {
-		this.host = config.host || 'localhost'
+		this.host = config.host || '192.168.1.45'
 		this.protocol = (
 			config.protocol ||
 			process.env.GATEWAY_PROTOCOL ||
@@ -17,9 +17,11 @@ class SynwayGateway {
 		this.username = config.username || 'admin'
 		this.password = config.password || 'admin'
 
-		// Endpoint configurable (default '/sendSMS')
+		// Endpoint configurable (default '/API/TaskHandle')
 		const endpoint =
-			config.smsEndpoint || process.env.GATEWAY_SMS_ENDPOINT || '/sendSMS'
+			config.smsEndpoint ||
+			process.env.GATEWAY_SMS_ENDPOINT ||
+			'/API/TaskHandle'
 		this.smsEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`
 
 		// Validate host to prevent SSRF
@@ -49,25 +51,35 @@ class SynwayGateway {
 	/**
 	 * Send SMS using HTTP API
 	 * According to Synway documentation, the HTTP API format is:
-	 * http://ip:port/sendSMS?username=xxx&password=xxx&to=phonenumber&text=message
+	 * http://ip:port/API/TaskHandle
 	 */
 	async sendSMS(phoneNumber, message) {
 		try {
-			const params = {
+			// Format for /API/TaskHandle
+			const data = {
+				op: 'SmsSend',
 				username: this.username,
 				password: this.password,
-				to: phoneNumber,
-				text: message,
+				dst: phoneNumber,
+				msg: message,
 			}
 
 			const url = `${this.baseUrl}${this.smsEndpoint}`
-			const response = await axios.get(url, {
-				params,
-				auth: {
-					username: this.username,
-					password: this.password,
-				},
+
+			// Convert to URLSearchParams to send as application/x-www-form-urlencoded
+			// Many hardware gateways do not support JSON payloads
+			const params = new URLSearchParams()
+			params.append('op', 'SmsSend')
+			params.append('username', this.username)
+			params.append('password', this.password)
+			params.append('dst', phoneNumber)
+			params.append('msg', message)
+
+			const response = await axios.post(url, params, {
 				timeout: 30000,
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded',
+				},
 			})
 
 			return {

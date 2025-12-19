@@ -210,45 +210,6 @@
     </div>
 
     <form action="/sms/upload" method="POST" enctype="multipart/form-data">
-      <div class="gateway-config">
-        <h3>⚙️ Configuración del Gateway</h3>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="gateway_host">Host/IP:</label>
-            <input type="text" id="gateway_host" name="gateway_host" placeholder="192.168.1.100" value="<%= process.env.GATEWAY_HOST || '' %>">
-          </div>
-          <div class="form-group">
-            <label for="gateway_protocol">Protocolo:</label>
-            <select id="gateway_protocol" name="gateway_protocol" style="width:100%; padding:12px; border:2px solid #e0e0e0; border-radius:5px; font-size:14px;">
-              <option value="http" <%= (process.env.GATEWAY_PROTOCOL || 'http') === 'http' ? 'selected' : '' %>>http</option>
-              <option value="https" <%= (process.env.GATEWAY_PROTOCOL || '') === 'https' ? 'selected' : '' %>>https</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="gateway_port">Puerto:</label>
-            <input type="number" id="gateway_port" name="gateway_port" placeholder="80" value="<%= process.env.GATEWAY_PORT || '80' %>">
-          </div>
-          <div class="form-group">
-            <label for="gateway_sms_endpoint">Endpoint de envío:</label>
-            <input type="text" id="gateway_sms_endpoint" name="gateway_sms_endpoint" placeholder="/sendSMS" value="<%= process.env.GATEWAY_SMS_ENDPOINT || '/sendSMS' %>">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="gateway_username">Usuario:</label>
-            <input type="text" id="gateway_username" name="gateway_username" placeholder="admin" value="<%= process.env.GATEWAY_USERNAME || 'admin' %>">
-          </div>
-
-          <div class="form-group">
-            <label for="gateway_password">Contraseña:</label>
-            <input type="password" id="gateway_password" name="gateway_password" placeholder="admin" value="<%= process.env.GATEWAY_PASSWORD || '' %>">
-          </div>
-        </div>
-      </div>
-
       <div class="form-group">
         <label for="file">📁 Seleccionar Archivo (XLSX o CSV):</label>
         <input type="file" id="file" name="file" accept=".xlsx,.xls,.csv" required>

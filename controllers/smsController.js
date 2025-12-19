@@ -48,23 +48,14 @@ class SMSController {
 				})
 			}
 
-			// Get gateway configuration from environment or request
+			// Get gateway configuration from environment
 			const gatewayConfig = {
-				host: req.body.gateway_host || process.env.GATEWAY_HOST || 'localhost',
-				port: req.body.gateway_port || process.env.GATEWAY_PORT || 80,
-				protocol: (
-					req.body.gateway_protocol ||
-					process.env.GATEWAY_PROTOCOL ||
-					'http'
-				).toLowerCase(),
-				smsEndpoint:
-					req.body.gateway_sms_endpoint ||
-					process.env.GATEWAY_SMS_ENDPOINT ||
-					'/sendSMS',
-				username:
-					req.body.gateway_username || process.env.GATEWAY_USERNAME || 'admin',
-				password:
-					req.body.gateway_password || process.env.GATEWAY_PASSWORD || 'admin',
+				host: process.env.GATEWAY_HOST || '192.168.1.45',
+				port: process.env.GATEWAY_PORT || 80,
+				protocol: (process.env.GATEWAY_PROTOCOL || 'http').toLowerCase(),
+				smsEndpoint: process.env.GATEWAY_SMS_ENDPOINT || '/API/TaskHandle',
+				username: process.env.GATEWAY_USERNAME || 'ApiUserAdmin',
+				password: process.env.GATEWAY_PASSWORD || 'acuerdo1234',
 			}
 
 			const gateway = new SynwayGateway(gatewayConfig)
@@ -106,10 +97,11 @@ class SMSController {
 		res.render('config', {
 			title: 'Gateway Configuration',
 			config: {
-				host: process.env.GATEWAY_HOST || 'localhost',
+				host: process.env.GATEWAY_HOST || '192.168.1.45',
 				port: process.env.GATEWAY_PORT || 80,
 				protocol: (process.env.GATEWAY_PROTOCOL || 'http').toLowerCase(),
-				username: process.env.GATEWAY_USERNAME || 'admin',
+				username: process.env.GATEWAY_USERNAME || 'ApiUserAdmin',
+				password: process.env.GATEWAY_PASSWORD || 'acuerdo1234',
 			},
 		})
 	}
@@ -120,7 +112,8 @@ class SMSController {
 	static async testConnection(req, res) {
 		try {
 			const gatewayConfig = {
-				host: req.body.gateway_host || process.env.GATEWAY_HOST || 'localhost',
+				host:
+					req.body.gateway_host || process.env.GATEWAY_HOST || '192.168.1.45',
 				port: req.body.gateway_port || process.env.GATEWAY_PORT || undefined,
 				protocol: (
 					req.body.gateway_protocol ||
@@ -128,9 +121,13 @@ class SMSController {
 					'http'
 				).toLowerCase(),
 				username:
-					req.body.gateway_username || process.env.GATEWAY_USERNAME || 'admin',
+					req.body.gateway_username ||
+					process.env.GATEWAY_USERNAME ||
+					'ApiUserAdmin',
 				password:
-					req.body.gateway_password || process.env.GATEWAY_PASSWORD || 'admin',
+					req.body.gateway_password ||
+					process.env.GATEWAY_PASSWORD ||
+					'acuerdo1234',
 			}
 
 			const gateway = new SynwayGateway(gatewayConfig)

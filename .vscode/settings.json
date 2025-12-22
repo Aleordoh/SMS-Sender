@@ -1,7 +1,11 @@
 {
-  "workbench.colorCustomizations": {
-    "activityBar.background": "#3B0E7A",
-    "titleBar.activeBackground": "#5313AB",
-    "titleBar.activeForeground": "#FDFBFF"
-  }
+	"workbench.colorCustomizations": {
+		"activityBar.background": "#3B0E7A",
+		"titleBar.activeBackground": "#5313AB",
+		"titleBar.activeForeground": "#FDFBFF"
+	},
+	"problems.exclude": {
+		"**/node_modules/express-rate-limit/**": true
+	},
+	"typescript.tsserver.experimental.enableProjectDiagnostics": false
 }

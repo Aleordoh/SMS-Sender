@@ -57,7 +57,7 @@ class FileParser {
     static parseCSV(filePath) {
         return new Promise((resolve, reject) => {
             const results = [];
-            const separator = this.detectSeparator(filePath);  // Detectar separador
+            const separator = this.detectSeparator(filePath);  // Detect separator
             
             fs.createReadStream(filePath)
                 .pipe(csv({ separator: separator }))

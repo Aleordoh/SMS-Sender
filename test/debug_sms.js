@@ -5,7 +5,7 @@
  * Tests the full SMS send and verify flow
  */
 
-const SynwayGateway = require('./services/synwayGateway')
+const SynwayGateway = require('../services/synwayGateway')
 
 // Gateway configuration
 const config = {

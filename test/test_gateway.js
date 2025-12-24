@@ -5,7 +5,7 @@
  * Tests connectivity and basic operations
  */
 
-const SynwayGateway = require('./services/synwayGateway')
+const SynwayGateway = require('../services/synwayGateway')
 
 // Gateway configuration from environment or defaults
 const config = {

@@ -4,7 +4,7 @@
  * Test SMS sending with specific port selection
  */
 
-const SynwayGateway = require('./services/synwayGateway')
+const SynwayGateway = require('../services/synwayGateway')
 
 const config = {
 	host: process.env.GATEWAY_HOST || '192.168.1.45',

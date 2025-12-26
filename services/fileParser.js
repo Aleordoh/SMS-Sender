@@ -40,14 +40,27 @@ class FileParser {
     }
 
     /**
+     * Detect CSV separator by reading first line
+     */
+    static detectSeparator(filePath) {
+        const firstLine = fs.readFileSync(filePath, 'utf-8').split('\n')[0];
+        const semicolonCount = (firstLine.match(/;/g) || []).length;
+        const commaCount = (firstLine.match(/,/g) || []).length;
+        
+        // Return separator with more occurrences
+        return semicolonCount > commaCount ? ';' : ',';
+    }
+
+    /**
      * Parse CSV file
      */
     static parseCSV(filePath) {
         return new Promise((resolve, reject) => {
             const results = [];
+            const separator = this.detectSeparator(filePath);  // Detect separator
             
             fs.createReadStream(filePath)
-                .pipe(csv())
+                .pipe(csv({ separator: separator }))
                 .on('data', (data) => results.push(data))
                 .on('end', () => {
                     try {

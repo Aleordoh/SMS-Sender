@@ -213,7 +213,7 @@ class SMSController {
 			const portCount = parseInt(req.body.port_count)
 			
 			// Validate port count (1-8)
-			if (portCount < 1 || portCount > 8 || isNaN(portCount)) {
+			if (isNaN(portCount) || portCount < 1 || portCount > 8) {
 				return res.json({
 					success: false,
 					message: 'Port count must be between 1 and 8'

@@ -140,9 +140,9 @@ async function testSequentialPorts() {
         console.log('\n✅ Test 3 PASSED: Single port distribution is working correctly!\n');
     }
     
-    console.log('=' .repeat(60));
+    console.log('============================================================');
     console.log('✅ All sequential port distribution tests completed successfully!');
-    console.log('=' .repeat(60));
+    console.log('============================================================');
 }
 
 // Run the test

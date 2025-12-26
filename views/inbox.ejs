@@ -31,7 +31,7 @@
         </div>
         <div class="inbox-stat-item">
           <span class="inbox-stat-label">Puertos Activos</span>
-          <span class="inbox-stat-value"><%= portCount %></span>
+          <span class="inbox-stat-value" data-port-count="true"><%= portCount %></span>
         </div>
         <div class="inbox-stat-item">
           <span class="inbox-stat-label">Última Actualización</span>
@@ -139,9 +139,15 @@
 
         const result = await response.json();
         if (result.success) {
-          // Update the display
-          const activePortsElement = document.querySelector('.inbox-stat-item:nth-child(2) .inbox-stat-value');
-          if (activePortsElement) {
+          // Update the display using the data attribute
+          const activePortsElement = document.querySelector('.inbox-stat-value[data-port-count]');
+          if (!activePortsElement) {
+            // Fallback to finding by content if data attribute not present
+            const statItems = document.querySelectorAll('.inbox-stat-value');
+            if (statItems.length >= 2) {
+              statItems[1].textContent = portCount;
+            }
+          } else {
             activePortsElement.textContent = portCount;
           }
           updateStatus(`Configuración guardada: ${portCount} puerto(s)`);

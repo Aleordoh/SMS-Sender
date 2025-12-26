@@ -15,6 +15,7 @@ router.post(
 router.get('/config', SMSController.showConfig)
 router.get('/inbox', SMSController.showInbox)
 router.post('/test-connection', testLimiter, SMSController.testConnection)
+router.post('/save-port-config', SMSController.savePortConfig)
 router.post('/query-received', SMSController.queryReceivedSMS)
 router.get('/download-received', SMSController.downloadReceivedSMS)
 

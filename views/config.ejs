@@ -50,6 +50,10 @@
         <span class="config-label">Delay entre envíos:</span>
         <span class="config-value"><%= config.sms_delay || 6000 %> ms</span>
       </div>
+      <div class="config-item">
+        <span class="config-label">Puertos GSM activos:</span>
+        <span class="config-value" id="currentPortCount"><%= config.port_count || 4 %> puertos</span>
+      </div>
     </div>
 
     <div class="api-docs">
@@ -70,6 +74,30 @@
         <a href="/manual/Gateway%20Synway%20GSM%20Series%20SMG4xxx_Manual.pdf" target="_blank" style="color: #667eea;">Manual del Gateway</a>
       </p>
       <p style="margin-top: 10px; color:#c62828"><strong>Importante:</strong> En el gateway, en <em>System Param → API Parameters</em>, activa <strong>API Enabled = Yes</strong>. Sin eso, la API no se activa</p>
+    </div>
+
+    <div class="test-section">
+      <div class="test-form">
+        <h3 style="margin-bottom: 15px; color: #667eea;">⚙️ Configurar Puertos GSM</h3>
+        <form id="portConfigForm">
+          <div class="form-group">
+            <label for="port_count">Número de puertos a utilizar (1-8):</label>
+            <select id="port_count" name="port_count" style="width:100%; padding:10px; border:2px solid #e0e0e0; border-radius:5px;">
+              <option value="1" <%= config.port_count == 1 ? 'selected' : '' %>>1 puerto</option>
+              <option value="2" <%= config.port_count == 2 ? 'selected' : '' %>>2 puertos</option>
+              <option value="3" <%= config.port_count == 3 ? 'selected' : '' %>>3 puertos</option>
+              <option value="4" <%= config.port_count == 4 ? 'selected' : '' %>>4 puertos</option>
+              <option value="5" <%= config.port_count == 5 ? 'selected' : '' %>>5 puertos</option>
+              <option value="6" <%= config.port_count == 6 ? 'selected' : '' %>>6 puertos</option>
+              <option value="7" <%= config.port_count == 7 ? 'selected' : '' %>>7 puertos</option>
+              <option value="8" <%= config.port_count == 8 ? 'selected' : '' %>>8 puertos</option>
+            </select>
+            <small style="color: #666; display: block; margin-top: 5px;">Los mensajes se enviarán secuencialmente rotando entre los puertos activos (ej: Puerto 1 → 2 → 3 → 4 → 1...)</small>
+          </div>
+          <button type="submit">💾 Guardar Configuración</button>
+        </form>
+        <div id="portConfigResult"></div>
+      </div>
     </div>
 
     <div class="test-section">

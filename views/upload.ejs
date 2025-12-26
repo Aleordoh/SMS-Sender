@@ -39,6 +39,10 @@
         <li>Tamaño máximo: 5MB</li>
         <li>Los mensajes no deben exceder 160 caracteres</li>
       </ul>
+      <p style="margin-top: 10px; padding: 10px; background: #f0f4ff; border-radius: 5px; color: #333;">
+        <strong>⚙️ Configuración actual:</strong> Los mensajes se enviarán secuencialmente usando <strong><%= portCount %> puerto(s)</strong> GSM. 
+        <a href="/sms/config" style="color: #667eea; text-decoration: underline;">Cambiar configuración</a>
+      </p>
     </div>
 
     <form action="/sms/upload" method="POST" enctype="multipart/form-data">

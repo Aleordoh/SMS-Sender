@@ -30,6 +30,10 @@
           <span class="inbox-stat-value" id="totalMessages">0</span>
         </div>
         <div class="inbox-stat-item">
+          <span class="inbox-stat-label">Puertos Activos</span>
+          <span class="inbox-stat-value"><%= portCount %></span>
+        </div>
+        <div class="inbox-stat-item">
           <span class="inbox-stat-label">Última Actualización</span>
           <span class="inbox-stat-value" id="lastUpdate" style="font-size: 14px;">--:--:--</span>
         </div>
@@ -55,6 +59,20 @@
           <option value="24">24 horas</option>
           <option value="72">3 días</option>
           <option value="168">7 días</option>
+        </select>
+      </div>
+
+      <div class="time-range-selector">
+        <label>⚙️ Puertos GSM:</label>
+        <select id="portCountSelector">
+          <option value="1" <%= portCount == 1 ? 'selected' : '' %>>1 puerto</option>
+          <option value="2" <%= portCount == 2 ? 'selected' : '' %>>2 puertos</option>
+          <option value="3" <%= portCount == 3 ? 'selected' : '' %>>3 puertos</option>
+          <option value="4" <%= portCount == 4 ? 'selected' : '' %>>4 puertos</option>
+          <option value="5" <%= portCount == 5 ? 'selected' : '' %>>5 puertos</option>
+          <option value="6" <%= portCount == 6 ? 'selected' : '' %>>6 puertos</option>
+          <option value="7" <%= portCount == 7 ? 'selected' : '' %>>7 puertos</option>
+          <option value="8" <%= portCount == 8 ? 'selected' : '' %>>8 puertos</option>
         </select>
       </div>
 
@@ -105,6 +123,41 @@
     // Time range change
     document.getElementById('timeRange').addEventListener('change', () => {
       manualRefresh();
+    });
+
+    // Port count change
+    document.getElementById('portCountSelector').addEventListener('change', async (e) => {
+      const portCount = e.target.value;
+      try {
+        const response = await fetch('/sms/save-port-config', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ port_count: portCount }),
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          // Update the display
+          const activePortsElement = document.querySelector('.inbox-stat-item:nth-child(2) .inbox-stat-value');
+          if (activePortsElement) {
+            activePortsElement.textContent = portCount;
+          }
+          updateStatus(`Configuración guardada: ${portCount} puerto(s)`);
+          
+          // Show brief success message
+          setTimeout(() => {
+            if (document.getElementById('autoRefreshToggle').checked) {
+              updateStatus('Auto-actualización activada');
+            }
+          }, 2000);
+        } else {
+          updateStatus('Error al guardar configuración');
+        }
+      } catch (error) {
+        updateStatus('Error al guardar configuración');
+      }
     });
 
     function startAutoRefresh() {

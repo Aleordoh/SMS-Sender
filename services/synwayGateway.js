@@ -126,20 +126,36 @@ class SynwayGateway {
 	}
 
 	/**
-	 * Send multiple SMS messages
+	 * Send multiple SMS messages with sequential port distribution
 	 * @param {Array} recipients - Array of recipients with phone and message
 	 * @param {Number} delayMs - Delay in milliseconds between each SMS (default: 6000ms)
+	 * @param {Number} portCount - Number of ports to use (1-8, default: 4)
 	 */
-	async sendBulkSMS(recipients, delayMs = 6000) {
+	async sendBulkSMS(recipients, delayMs = 6000, portCount = 4) {
 		const results = []
+		
+		// Validate port count
+		const numPorts = Math.min(Math.max(parseInt(portCount) || 4, 1), 8)
+		let currentPortIndex = 0
 
 		for (const recipient of recipients) {
-			const result = await this.sendSMS(recipient.phone, recipient.message)
+			// Calculate current port (1-based indexing)
+			const port = (currentPortIndex % numPorts) + 1
+			
+			// Send SMS with specific port
+			const result = await this.sendSMS(recipient.phone, recipient.message, {
+				port: port.toString()
+			})
+			
 			results.push({
 				phone: recipient.phone,
 				message: recipient.message,
+				port: port,
 				...result,
 			})
+
+			// Move to next port for sequential distribution
+			currentPortIndex++
 
 			// Configurable delay between messages to avoid overwhelming the gateway
 			if (delayMs > 0) {

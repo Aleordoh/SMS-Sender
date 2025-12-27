@@ -42,6 +42,7 @@
           <th>#</th>
           <th>Teléfono</th>
           <th>Mensaje</th>
+          <th>Puerto</th>
           <th>Estado</th>
           <th>Detalles</th>
         </tr>
@@ -53,6 +54,13 @@
           <td><%= result.phone %></td>
           <td class="message-preview" title="<%= result.message %>">
             <%= result.message %>
+          </td>
+          <td>
+            <% if (result.port) { %>
+            <span style="background: #667eea; color: white; padding: 3px 8px; border-radius: 3px; font-size: 12px;">Puerto <%= result.port %></span>
+            <% } else { %>
+            <span style="color: #999;">-</span>
+            <% } %>
           </td>
           <td>
             <span class="status <%= result.success ? 'success' : 'failed' %>">

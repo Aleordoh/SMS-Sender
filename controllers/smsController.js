@@ -15,6 +15,7 @@ class SMSController {
 			title: 'SMS Sender - Synway Gateway',
 			error: null,
 			success: null,
+			portCount: req.session.portCount || process.env.SMS_PORT_COUNT || 4,
 		})
 	}
 
@@ -60,9 +61,10 @@ class SMSController {
 
 			const gateway = new SynwayGateway(gatewayConfig)
 
-			// Send SMS messages with configurable delay
+			// Send SMS messages with configurable delay and port count
 			const smsDelay = parseInt(process.env.SMS_DELAY || 6000)
-			const results = await gateway.sendBulkSMS(recipients, smsDelay)
+			const portCount = parseInt(req.session.portCount || process.env.SMS_PORT_COUNT || 4)
+			const results = await gateway.sendBulkSMS(recipients, smsDelay, portCount)
 
 			// Clean up uploaded file
 			fs.unlinkSync(req.file.path)
@@ -105,6 +107,7 @@ class SMSController {
 				username: process.env.GATEWAY_USERNAME || 'ApiUserAdmin',
 				password: process.env.GATEWAY_PASSWORD || 'acuerdo1234',
 				sms_delay: process.env.SMS_DELAY || 6000,
+				port_count: req.session.portCount || process.env.SMS_PORT_COUNT || 4,
 			},
 		})
 	}
@@ -198,7 +201,39 @@ class SMSController {
 	static showInbox(req, res) {
 		res.render('inbox', {
 			title: 'Mensajes Recibidos - SMS Sender',
+			portCount: req.session.portCount || process.env.SMS_PORT_COUNT || 4,
 		})
+	}
+
+	/**
+	 * Save port configuration
+	 */
+	static savePortConfig(req, res) {
+		try {
+			const portCount = parseInt(req.body.port_count)
+			
+			// Validate port count (1-8)
+			if (isNaN(portCount) || portCount < 1 || portCount > 8) {
+				return res.json({
+					success: false,
+					message: 'Port count must be between 1 and 8'
+				})
+			}
+			
+			// Save to session
+			req.session.portCount = portCount
+			
+			res.json({
+				success: true,
+				message: `Configuration saved. Using ${portCount} port(s) for sequential SMS sending.`,
+				portCount: portCount
+			})
+		} catch (error) {
+			res.json({
+				success: false,
+				message: `Error: ${error.message}`
+			})
+		}
 	}
 
 	/**

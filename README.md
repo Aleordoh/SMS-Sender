@@ -8,8 +8,9 @@ Sistema de envío masivo de SMS para el Gateway Synway SMG4008-8WA utilizando Ex
 - 📁 Soporte para archivos XLSX y CSV
 - 🎨 Interfaz web moderna con EJS templates y CSS separados
 - ⚙️ Configuración flexible del gateway
+- 🔄 **Distribución secuencial de mensajes entre puertos GSM** (configurable de 1 a 8 puertos)
 - ⏱️ **Delay configurable entre envíos** para evitar saturar el gateway
-- 📊 Resultados detallados del envío
+- 📊 Resultados detallados del envío con puerto utilizado
 - 📨 **Consulta de respuestas SMS recibidas**
 - 📥 **Descarga de respuestas en formato CSV**
 - ✅ Validación de números y mensajes
@@ -43,6 +44,7 @@ GATEWAY_PORT=80
 GATEWAY_USERNAME=admin
 GATEWAY_PASSWORD=admin
 SMS_DELAY=6000
+SMS_PORT_COUNT=4
 PORT=3000
 ```
 
@@ -97,6 +99,29 @@ Ver archivo de ejemplo en `examples/sample.csv`
 4. Hacer clic en "Enviar SMS Masivos"
 5. Ver los resultados del envío
 
+### Configurar distribución de puertos GSM
+
+El sistema permite configurar cuántos puertos GSM usar para el envío secuencial de mensajes:
+
+1. Ir a `http://localhost:3000/sms/config` o `http://localhost:3000/sms/inbox`
+2. Seleccionar el número de puertos a utilizar (1-8)
+3. Los mensajes se distribuirán secuencialmente entre los puertos configurados
+
+**Ejemplo con 4 puertos:**
+- Mensaje 1 → Puerto 1
+- Mensaje 2 → Puerto 2
+- Mensaje 3 → Puerto 3
+- Mensaje 4 → Puerto 4
+- Mensaje 5 → Puerto 1 (reinicia el ciclo)
+- Mensaje 6 → Puerto 2
+- ...y así sucesivamente
+
+**Ventajas:**
+- ✅ Distribución equitativa de carga entre puertos
+- ✅ Evita saturación de un solo puerto
+- ✅ Mejor rendimiento y confiabilidad
+- ✅ Visible en resultados qué puerto usó cada mensaje
+
 ### Probar conexión
 
 Puedes probar la conexión con el gateway en la sección de configuración:
@@ -130,11 +155,16 @@ El sistema utiliza la **API HTTP v1.8.0** del Gateway Synway SMG4008-8WA:
 	"event": "txsms",
 	"userid": "0",
 	"num": "1234567890",
-	"port": "-1",
+	"port": "1",
 	"encoding": "0",
 	"smsinfo": "Hola Mundo!"
 }
 ```
+
+**Parámetro `port`:**
+- `-1`: El gateway selecciona automáticamente el puerto (comportamiento anterior)
+- `"1"`, `"2"`, ... `"8"`: Usa un puerto específico
+- El sistema ahora usa distribución secuencial automática basada en la configuración
 
 **2. Consultar información** - `POST http://[host]:[port]/API/QueryInfo`
 

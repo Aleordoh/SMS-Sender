@@ -1,5 +1,56 @@
 # Actualizaciones Recientes - SMS Sender
 
+## Cambios Implementados (26 de diciembre de 2025)
+
+### 1. 🔄 Distribución Secuencial de Mensajes entre Puertos GSM
+
+Se ha implementado un sistema de distribución secuencial de mensajes entre los puertos GSM del gateway:
+
+**Nuevas características:**
+
+- **Configuración de puertos activos**: Selector para elegir cuántos puertos GSM utilizar (1-8)
+- **Distribución equitativa**: Los mensajes se distribuyen secuencialmente entre los puertos configurados
+- **Interfaz mejorada**: Configuración disponible en `/sms/config` y `/sms/inbox`
+- **Visibilidad**: Los resultados muestran qué puerto se utilizó para cada mensaje
+- **Persistencia**: La configuración se guarda en la sesión del usuario
+- **Variable de entorno**: `SMS_PORT_COUNT` (por defecto: 4)
+
+**Cómo funciona:**
+
+Con 4 puertos configurados, los mensajes se envían así:
+- Mensaje 1 → Puerto 1
+- Mensaje 2 → Puerto 2
+- Mensaje 3 → Puerto 3
+- Mensaje 4 → Puerto 4
+- Mensaje 5 → Puerto 1 (reinicia el ciclo)
+- Y así sucesivamente...
+
+**Beneficios:**
+
+- ✅ Distribución equitativa de carga entre puertos
+- ✅ Evita saturación de un solo puerto GSM
+- ✅ Mejor rendimiento y confiabilidad en envíos masivos
+- ✅ Soluciona el problema de distribución desigual del gateway en modo automático
+
+**Configuración:**
+
+1. Ir a Configuración o Mensajes Recibidos
+2. Seleccionar número de puertos (1-8)
+3. Guardar configuración
+4. Los próximos envíos usarán la distribución secuencial
+
+**Archivos modificados:**
+
+- `.env.example`: Agregada variable `SMS_PORT_COUNT`
+- `services/synwayGateway.js`: Implementada lógica de distribución secuencial
+- `controllers/smsController.js`: Agregado manejo de configuración de puertos
+- `routes/sms.Routes.js`: Nueva ruta para guardar configuración
+- `views/config.ejs`: Selector de puertos GSM
+- `views/inbox.ejs`: Selector de puertos y visualización
+- `views/upload.ejs`: Indicador de configuración actual
+- `views/results.ejs`: Columna de puerto en tabla de resultados
+- `public/js/testConnection.js`: Handler para guardar configuración
+
 ## Cambios Implementados (19 de diciembre de 2025)
 
 ### 1. ✅ Separación de Estilos CSS

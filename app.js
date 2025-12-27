@@ -9,6 +9,19 @@ app.set('trust proxy', 1)
 app.set('view engine', 'ejs')
 app.set('views', path.join(__dirname, 'views'))
 
+// Aumentar timeouts para solicitudes largas (envío de SMS en bulk - hasta 400 mensajes)
+const server = app.listen(process.env.PORT || 3000, () => {
+	console.log(`Server running on port ${process.env.PORT || 3000}`)
+	console.log(
+		`Open http://localhost:${process.env.PORT || 3000} in your browser`
+	)
+})
+
+// Configurar timeouts del servidor HTTP
+// 400 mensajes × 6s = 2400s (40 min), configuramos 3000s (50 min) por seguridad
+server.keepAliveTimeout = 3001000 // 3001 segundos
+server.headersTimeout = 3002000 // 3002 segundos (debe ser > keepAliveTimeout)
+
 // Middleware
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -39,10 +52,4 @@ app.use((err, req, res, next) => {
 		error: err.message,
 		success: null,
 	})
-})
-
-const PORT = process.env.PORT || 3000
-app.listen(PORT, () => {
-	console.log(`Server running on port ${PORT}`)
-	console.log(`Open http://localhost:${PORT} in your browser`)
 })

@@ -67,7 +67,7 @@ class SynwayGateway {
 			}
 
 			const response = await axios.post(url, data, {
-				timeout: 30000,
+				timeout: 60000, // 60 segundos para respuestas lentas del gateway
 				headers: {
 					'Content-Type': 'application/json',
 				},
@@ -133,7 +133,7 @@ class SynwayGateway {
 	 */
 	async sendBulkSMS(recipients, delayMs = 6000, portCount = 4) {
 		const results = []
-		
+
 		// Validate port count
 		const numPorts = Math.min(Math.max(parseInt(portCount) || 4, 1), 8)
 		let currentPortIndex = 0
@@ -141,12 +141,12 @@ class SynwayGateway {
 		for (const recipient of recipients) {
 			// Calculate current port (1-based indexing)
 			const port = (currentPortIndex % numPorts) + 1
-			
+
 			// Send SMS with specific port
 			const result = await this.sendSMS(recipient.phone, recipient.message, {
-				port: port.toString()
+				port: port.toString(),
 			})
-			
+
 			results.push({
 				phone: recipient.phone,
 				message: recipient.message,

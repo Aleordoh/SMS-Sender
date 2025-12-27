@@ -7,6 +7,7 @@ const uploadLimiter = rateLimit({
 	message: 'Demasiadas solicitudes desde esta IP, por favor intente más tarde.',
 	keyGenerator: (req, res) => req.ip, // Use Express's computed IP (respects trust proxy)
 	skip: (req, res) => false, // Don't skip validation
+	validate: { xForwardedForHeader: false },
 })
 
 // Rate limiting middleware for connection tests
@@ -16,6 +17,7 @@ const testLimiter = rateLimit({
 	message: 'Demasiadas pruebas de conexión, por favor intente más tarde.',
 	keyGenerator: (req, res) => req.ip, // Use Express's computed IP (respects trust proxy)
 	skip: (req, res) => false, // Don't skip validation
+	validate: { xForwardedForHeader: false },
 })
 
 module.exports = {
